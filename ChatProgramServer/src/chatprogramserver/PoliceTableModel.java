@@ -19,7 +19,7 @@ import javax.swing.table.AbstractTableModel;
 public class PoliceTableModel extends AbstractTableModel {
 
     List<Police> data;
-    String[] colNames = {"name", "dob", "current_position", "speed", "atk", "color"};
+    String[] colNames = {"name", "dob", "current_position", "speed", "atk", "color","timecreated"};
 
     public PoliceTableModel(ConcurrentSkipListSet<Police> csSet) {
         this.data = new ArrayList<>();
@@ -78,6 +78,8 @@ public class PoliceTableModel extends AbstractTableModel {
                 return police.getAtk();
             case 5:
                 return "(" + police.getColor().getRed() + "," + police.getColor().getGreen() + "," + police.getColor().getBlue() + ")";
+            case 6:
+                return police.getTime();
         }
         return null;
     }

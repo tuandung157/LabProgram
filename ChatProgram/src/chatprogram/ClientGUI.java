@@ -6,13 +6,12 @@
 package chatprogram;
 
 import ProgramLab.Police;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,13 +20,20 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ComboBoxModel;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 /**
@@ -49,24 +55,56 @@ public class ClientGUI extends javax.swing.JFrame {
         {"Támadás", "Sebesség", "Nyelv", "Név", "Rajt", "Állj meg"}, //hung
         {"Attack", "Speed", "Language", "Name", "Start", "Stop"} //eng
     };
-
+    private LocalDateTime time = LocalDateTime.now(); 
     public ClientGUI() {
+        
         try {
             initComponents();
-            this.setSize(1280, 960);
+            this.setSize(960, 600);
+//            this.setBounds(200, 400, 1280, 960);
+            this.setTitle("Client");
             client = new Client();
             client.connect();
             circles_animation = new ArrayList<>();
-
+            
+            
             //comboBoxLang
             comboBoxLang.removeAllItems();
             for (int i = 0; i < langString.length; i++) {
                 comboBoxLang.addItem(langString[i]);
             }
-//            comboBoxLang.addItem("Russian");
-//            comboBoxLang.addItem("Serbian");
-//            comboBoxLang.addItem("Hungarian");
-//            comboBoxLang.addItem("English");
+            //timeCurrent
+        
+           
+            Container contentPane = this.getContentPane();
+            contentPane.setLayout(new BorderLayout());
+            
+            JStatusBar statusBar = new JStatusBar();
+            JLabel leftLabel = new JLabel("Your application is running.");
+            statusBar.setLeftComponent(leftLabel);
+            
+            final JLabel dateLabel = new JLabel();
+            dateLabel.setHorizontalAlignment(JLabel.CENTER);
+            statusBar.addRightComponent(dateLabel);
+            
+            final JLabel timeLabel = new JLabel();
+            timeLabel.setHorizontalAlignment(JLabel.CENTER);
+            statusBar.addRightComponent(timeLabel);
+            
+            contentPane.add(statusBar, BorderLayout.SOUTH);
+            
+            this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent event) {
+                System.exit(0);
+            }
+        });
+            TimerThread timerThread = new TimerThread(dateLabel, timeLabel);
+            timerThread.start();
+            
+            
+            
             comboBoxLang.setSelectedIndex(0);
             Timer t = new Timer(5000, new ActionListener() {
                 @Override
@@ -138,6 +176,7 @@ public class ClientGUI extends javax.swing.JFrame {
         sliderAttack = new javax.swing.JSlider();
         labelLang = new javax.swing.JLabel();
         comboBoxLang = new javax.swing.JComboBox<>();
+        currentTime = new javax.swing.JLabel();
 
         javax.swing.GroupLayout jFrame1Layout = new javax.swing.GroupLayout(jFrame1.getContentPane());
         jFrame1.getContentPane().setLayout(jFrame1Layout);
@@ -261,26 +300,31 @@ public class ClientGUI extends javax.swing.JFrame {
                 .addComponent(labelLang)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(comboBoxLang, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 42, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 108, Short.MAX_VALUE)
                 .addGroup(jDesktopPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(bntStart, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                     .addComponent(bntStop, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(27, 27, 27))
         );
 
+        currentTime.setText("Time");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(609, Short.MAX_VALUE)
-                .addComponent(jDesktopPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(704, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jDesktopPane1)
+                    .addComponent(currentTime, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(currentTime, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jDesktopPane1)
                 .addContainerGap())
         );
@@ -380,15 +424,62 @@ public class ClientGUI extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new ClientGUI().setVisible(true);
+                
             }
         });
     }
+    public class TimerThread extends Thread {
 
+        protected boolean isRunning;
+
+        protected JLabel dateLabel;
+        protected JLabel timeLabel;
+
+        protected SimpleDateFormat dateFormat = 
+                new SimpleDateFormat("EEE, d MMM yyyy");
+        protected SimpleDateFormat timeFormat =
+                new SimpleDateFormat("h:mm a");
+
+        public TimerThread(JLabel dateLabel, JLabel timeLabel) {
+            this.dateLabel = dateLabel;
+            this.timeLabel = timeLabel;
+            this.isRunning = true;
+        }
+
+        @Override
+        public void run() {
+            while (isRunning) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        Calendar currentCalendar = Calendar.getInstance();
+                        Date currentTime = currentCalendar.getTime();
+                        dateLabel.setText(dateFormat.format(currentTime));
+                        timeLabel.setText(timeFormat.format(currentTime));
+                        
+                    }
+                });
+
+                try {
+                    Thread.sleep(5000L);
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+
+        public void setRunning(boolean isRunning) {
+            this.isRunning = isRunning;
+        }
+
+    }
+
+        
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bntStart;
     private javax.swing.JButton bntStop;
     private javax.swing.JComboBox<String> comboBoxLang;
     private javax.swing.JComboBox<String> comboBoxName;
+    private javax.swing.JLabel currentTime;
     private javax.swing.JDesktopPane jDesktopPane1;
     private javax.swing.JFrame jFrame1;
     private javax.swing.JFrame jFrame2;
@@ -399,4 +490,6 @@ public class ClientGUI extends javax.swing.JFrame {
     private javax.swing.JSlider sliderAttack;
     private javax.swing.JSlider sliderSpeed;
     // End of variables declaration//GEN-END:variables
+
+    
 }
