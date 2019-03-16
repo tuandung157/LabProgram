@@ -1,1 +1,2 @@
-# timecontroller
+# labprogram
+use java + postgresql
