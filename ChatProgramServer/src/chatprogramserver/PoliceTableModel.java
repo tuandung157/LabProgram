@@ -71,15 +71,17 @@ public class PoliceTableModel extends AbstractTableModel {
             case 1:
                 return police.getDob().toString();
             case 2:
-                return police.getCurrent_position();
+                return police.getPosx();
             case 3:
-                return police.getSpeed();
+                return police.getPosx();
             case 4:
-                return police.getAtk();
+                return police.getSpeed();
             case 5:
-                return "(" + police.getColor().getRed() + "," + police.getColor().getGreen() + "," + police.getColor().getBlue() + ")";
+                return police.getAtk();
             case 6:
-                return police.getTime();
+                return police.getColor();
+            case 7:
+                return police.getTimecreated();
         }
         return null;
     }

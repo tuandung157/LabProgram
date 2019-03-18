@@ -85,7 +85,7 @@ public class Circle implements MouseMotionListener, Runnable {
     }
 
     public int getX() {
-        return data.getCurrent_position().getX() + MIN_SIZE / 2;
+        return data.getPosx() + MIN_SIZE / 2;
     }
 
     public int getHeight() {
@@ -97,11 +97,11 @@ public class Circle implements MouseMotionListener, Runnable {
     }
 
     public int getY() {
-        return data.getCurrent_position().getY() + MIN_SIZE / 2;
+        return data.getPosy() + MIN_SIZE / 2;
     }
 
     Color getColor() {
-        return data.getColor();
+        return new Color(data.getColor());
     }
 
     public void drawInfo(Graphics g) {

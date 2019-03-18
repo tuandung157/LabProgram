@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated Nov 16, 2018 4:37:07 AM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+  <class name="myPack.Policedb" optimistic-lock="version" schema="public" table="polices">
+    <id name="id" type="int">
+      <column name="id"/>
+      <generator class="assigned"/>
+    </id>
+    <property name="name" type="string">
+      <column length="50" name="name"/>
+    </property>
+    <property name="dob" type="date">
+      <column length="13" name="dob"/>
+    </property>
+    <property name="posx" type="java.lang.Integer">
+      <column name="posx"/>
+    </property>
+    <property name="posy" type="java.lang.Integer">
+      <column name="posy"/>
+    </property>
+    <property name="speed" type="java.lang.Integer">
+      <column name="speed"/>
+    </property>
+    <property name="atk" type="java.lang.Integer">
+      <column name="atk"/>
+    </property>
+    <property name="color" type="java.lang.Integer">
+      <column name="color"/>
+    </property>
+    <property name="timecreated" type="timestamp">
+      <column length="29" name="timecreated"/>
+    </property>
+  </class>
+</hibernate-mapping>

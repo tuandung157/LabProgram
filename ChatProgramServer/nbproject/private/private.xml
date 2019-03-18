@@ -2,6 +2,17 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/chatprogramserver/Login.java</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/nbproject/build-impl.xml</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/hibernate.cfg.xml</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/connection/NewHibernateUtil.java</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/chatprogramserver/PoliceORM.java</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/chatprogramserver/Server.java</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/hibernate.reveng.xml</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/chatprogramserver/Server_cmd.java</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/myPack/hibernate.hbm.xml</file>
+            <file>file:/C:/Users/tuandung/Desktop/LabProgram-master/ChatProgramServer/src/chatprogramserver/ServerGUI.java</file>
+        </group>
     </open-files>
 </project-private>

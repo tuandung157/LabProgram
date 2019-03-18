@@ -5,7 +5,6 @@
  */
 package chatprogramserver;
 
-import ProgramLab.Point;
 import ProgramLab.Police;
 import java.awt.Color;
 import java.sql.CallableStatement;
@@ -28,14 +27,17 @@ public class PoliceDAO {
         ArrayList<Police> results = new ArrayList<>();
         while(rs.next()){
             Police p = new Police();
-            p.setID(rs.getInt(1));
+            p.setId(rs.getInt(1));
             p.setName(rs.getString(2).trim());
             p.setDob(rs.getDate(3));
-            p.setCurrent_position(new Point(rs.getInt(4),rs.getInt(5)));
+            //p.setCurrent_position(new Point(rs.getInt(4),rs.getInt(5)));
+            p.setPosx(rs.getInt(4));
+            p.setPosy(rs.getInt(5));
             p.setSpeed(rs.getInt(6));
             p.setAtk(rs.getInt(7));
-            p.setColor(new Color(rs.getInt(8),false));
-            p.setTime(rs.getTimestamp(9).toLocalDateTime());
+           //p.setColor(new Color(rs.getInt(8),false));
+            p.setColor(rs.getInt(9));
+            p.setTimecreated(rs.getTimestamp(9).toLocalDateTime());
             results.add(p);
             
         }
@@ -46,12 +48,12 @@ public class PoliceDAO {
         PreparedStatement s = JDBCConnection.getConnection().prepareStatement("INSERT INTO Polices(NAME, DOB, POSX, POSY, SPEED, ATK, COLOR,TIMECREATED) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         s.setString(1,p.getName());
         s.setDate(2, new Date(p.getDob().getTime()));
-        s.setInt(3,p.getCurrent_position().getX());
-        s.setInt(4,p.getCurrent_position().getY());
+        s.setInt(3,p.getPosx());
+        s.setInt(4,p.getPosy());
         s.setInt(5,p.getSpeed());
         s.setInt(6,p.getAtk());
-        s.setInt(7,p.getColor().getRGB());
-        s.setTimestamp(8,Timestamp.valueOf(p.getTime()));
+        s.setInt(7,p.getColor());
+        s.setTimestamp(8,Timestamp.valueOf(p.getTimecreated()));
         
         return s.execute();
         
@@ -61,12 +63,12 @@ public class PoliceDAO {
         PreparedStatement s = JDBCConnection.getConnection().prepareStatement("UPDATE Polices SET NAME = ?,DOB = ?,POSX = ?,POSY = ?,SPEED = ?,ATK = ?,COLOR = ? where ID = ? ");
         s.setString(1,p.getName());
         s.setDate(2,  convertUtilToSql(p.getDob()));
-        s.setInt(3,p.getCurrent_position().getX());
-        s.setInt(4,p.getCurrent_position().getY());
+        s.setInt(3,p.getPosx());
+        s.setInt(4,p.getPosy());
         s.setInt(5,p.getSpeed());
         s.setInt(6,p.getAtk());
-        s.setInt(7,p.getColor().getRGB());
-        s.setInt(8,p.getID());
+        s.setInt(7,p.getColor());
+        s.setInt(8,p.getId());
        
         return s.execute();
         
@@ -74,7 +76,7 @@ public class PoliceDAO {
     
     public boolean deleteElement(Police p) throws SQLException {
         PreparedStatement s = JDBCConnection.getConnection().prepareStatement("DELETE FROM Polices where ID = ? ");
-        s.setInt(1,p.getID());
+        s.setInt(1,p.getId());
         
         return s.execute();        
         

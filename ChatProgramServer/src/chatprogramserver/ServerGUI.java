@@ -5,28 +5,23 @@
  */
 package chatprogramserver;
 
-import ProgramLab.CsvFile;
-import ProgramLab.PComparator;
-import ProgramLab.Police;
-import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import java.io.IOException;
+
+
+import ProgramLab.Police;
+import connection.Policedb;
+import java.awt.Color;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import static java.util.Collections.synchronizedList;
 import java.util.List;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
-import javax.swing.JFormattedTextField;
-import javax.swing.Timer;
-import javax.swing.colorchooser.ColorChooserComponentFactory;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -39,47 +34,45 @@ public class ServerGUI extends javax.swing.JFrame {
     /**
      * Creates new form ServerGUI
      */
-    private PoliceTableModel model;
-    private Server server;
+    protected PoliceTableModel model;
+    protected Server server;
 
     public ServerGUI() {
-        try {
-            initComponents();
-            //read from database
-            ArrayList<Police> arrPolice = new PoliceDAO().getAll();
-            ;
-            System.out.println(arrPolice);
-            model = new PoliceTableModel(arrPolice);
-            table.setModel(model);
-//            try {
+        initComponents();
+        //read from database
+        ArrayList<Police> arrPolice = null ;
+        //List <Police> arrPolice = new PoliceORM().getAll();
+        PoliceORM db = new PoliceORM();
+        List <Policedb> PoliceDB =db.read();
+        PoliceDB.stream().forEach(p -> arrPolice.add(new Police(p.getId(),p.getName(),p.getDob(),p.getPosx(),p.getPosy(),p.getSpeed(),p.getAtk(),p.getColor(),p.getTimecreated().toLocalDateTime())));
+        model = new PoliceTableModel(arrPolice);
+        table.setModel(model);
+        //            try {
 //                CsvFile.loadCsvFile(fileName, arrPolice);
 //            } catch (IOException | ParseException ex) {
 //                Logger.getLogger(Server_cmd.class.getName()).log(Level.SEVERE, null, ex);
 //            }
-            table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    if (!e.getValueIsAdjusting() && table.getSelectedRow() > -1) {
-
-                        Police police = model.get(table.getSelectedRow());
-                        ServerGUI.this.displayInfo(police);
-                        ServerGUI.this.setFormActive(false);
-
-                    }
-                }
-            });
-            setFormActive(false);
-            System.out.println("Date Loaded In!");
-            try {
-                server = new Server(arrPolice);
-                server.start();
-                System.out.println("Started server");
-            } catch (IOException ex) {
-                Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } catch (SQLException ex) {
+table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (!e.getValueIsAdjusting() && table.getSelectedRow() > -1) {
+            
+            Police police = model.get(table.getSelectedRow());
+            ServerGUI.this.displayInfo(police);
+            ServerGUI.this.setFormActive(false);
+            
+        }
+    }
+});
+setFormActive(false);
+System.out.println("Date Loaded In!");
+        try {
+            server = new Server(arrPolice);
+        } catch (IOException ex) {
             Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
+server.start();
+System.out.println("Started server");
 
     }
 
@@ -88,20 +81,21 @@ public class ServerGUI extends javax.swing.JFrame {
         txtDob.setText(new SimpleDateFormat("dd/MM/yyyy").format(police.getDob()));
         slideAtk.setValue(police.getAtk());
         slideSpeed.setValue(police.getSpeed());
-        txtPosX.setText(police.getCurrent_position().toString());
-        btnColor.setBackground(police.getColor());
+        txtPosx.setText(police.getPosx().toString());
+        txtPosy.setText(police.getPosx().toString());
+        btnColor.setBackground(new Color(police.getColor()));
         
     }
 
-    protected Police getInfo() {
-        try {
-            System.out.println(txtPosX.getText());
-            return new Police(txtName.getText(), new SimpleDateFormat("dd/MM/yyyy").parse(txtDob.getText()),
-                    ProgramLab.Point.parse(txtPosX.getText()), slideSpeed.getValue(), slideAtk.getValue(), btnColor.getBackground());
-        } catch (ParseException ex) {
-            Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+    protected Police getInfo() throws ParseException {
+//        try {
+//            return new Police(txtName.getText(), new SimpleDateFormat("dd/MM/yyyy").parse(txtDob.getText()),
+//                   Integer.parseInt(txtPosx.getText()), Integer.parseInt(txtPosy.getText()), slideSpeed.getValue(), slideAtk.getValue(), btnColor.getBackground());
+//        } catch (ParseException ex) {
+//            Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
+//            return null;
+//        }
+        return new Police(txtName.getText(), new SimpleDateFormat("dd/MM/yyyy").parse(txtDob.getText()), Integer.parseInt(txtPosx.getText()), Integer.parseInt(txtPosy.getText()), slideSpeed.getValue(), slideAtk.getValue(), btnColor.getBackground().getRGB());
     }
 
     protected void setFormActive(boolean status) {
@@ -109,7 +103,8 @@ public class ServerGUI extends javax.swing.JFrame {
         txtDob.setEditable(status);
         slideAtk.setEnabled(status);
         slideSpeed.setEnabled(status);
-        txtPosX.setEditable(status);
+        txtPosx.setEditable(status);
+        txtPosy.setEditable(status);
         if (status) {
             btnColor.addActionListener(colorChooserActionListener);
         } else {
@@ -155,13 +150,14 @@ public class ServerGUI extends javax.swing.JFrame {
         slideSpeed = new javax.swing.JSlider();
         slideAtk = new javax.swing.JSlider();
         txtDob = new javax.swing.JFormattedTextField();
-        txtPosX = new javax.swing.JFormattedTextField();
         btnColor = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        txtPosx = new javax.swing.JTextField();
+        txtPosy = new javax.swing.JTextField();
         jMenuBar1 = new javax.swing.JMenuBar();
         menu = new javax.swing.JMenu();
         btnLoad = new javax.swing.JMenuItem();
@@ -228,13 +224,6 @@ public class ServerGUI extends javax.swing.JFrame {
         txtDob.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.DateFormatter(new java.text.SimpleDateFormat("dd/MM/yyyy"))));
         txtDob.setToolTipText("dd/MM/yyyy");
 
-        try {
-            txtPosX.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.MaskFormatter("###;###")));
-        } catch (java.text.ParseException ex) {
-            ex.printStackTrace();
-        }
-        txtPosX.setToolTipText("###;###");
-
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setText("Name");
@@ -259,13 +248,14 @@ public class ServerGUI extends javax.swing.JFrame {
         jDesktopPane1.setLayer(slideSpeed, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jDesktopPane1.setLayer(slideAtk, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jDesktopPane1.setLayer(txtDob, javax.swing.JLayeredPane.DEFAULT_LAYER);
-        jDesktopPane1.setLayer(txtPosX, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jDesktopPane1.setLayer(btnColor, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jDesktopPane1.setLayer(jLabel1, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jDesktopPane1.setLayer(jLabel2, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jDesktopPane1.setLayer(jLabel3, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jDesktopPane1.setLayer(jLabel4, javax.swing.JLayeredPane.DEFAULT_LAYER);
         jDesktopPane1.setLayer(jLabel5, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        jDesktopPane1.setLayer(txtPosx, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        jDesktopPane1.setLayer(txtPosy, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         javax.swing.GroupLayout jDesktopPane1Layout = new javax.swing.GroupLayout(jDesktopPane1);
         jDesktopPane1.setLayout(jDesktopPane1Layout);
@@ -287,7 +277,10 @@ public class ServerGUI extends javax.swing.JFrame {
                     .addComponent(slideSpeed, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(txtDob, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(txtName, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(txtPosX))
+                    .addGroup(jDesktopPane1Layout.createSequentialGroup()
+                        .addComponent(txtPosx, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(txtPosy, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jDesktopPane1Layout.setVerticalGroup(
@@ -301,10 +294,15 @@ public class ServerGUI extends javax.swing.JFrame {
                 .addGroup(jDesktopPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtDob, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
-                .addGap(13, 13, 13)
-                .addGroup(jDesktopPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtPosX, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3))
+                .addGroup(jDesktopPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jDesktopPane1Layout.createSequentialGroup()
+                        .addGap(13, 13, 13)
+                        .addGroup(jDesktopPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(txtPosx, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jDesktopPane1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtPosy, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jDesktopPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jDesktopPane1Layout.createSequentialGroup()
@@ -359,7 +357,6 @@ public class ServerGUI extends javax.swing.JFrame {
                             .addComponent(btnEdit, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(60, 60, 60))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jDesktopPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap())))
         );
@@ -392,20 +389,25 @@ public class ServerGUI extends javax.swing.JFrame {
             btnEdit.setText("Accept");
         } else {
             synchronized (model) {
-                Police target = model.get(table.getSelectedRow());
-                Police afterEdit = getInfo();
-                target.setName(afterEdit.getName());
-                target.setDob(afterEdit.getDob());
-                target.setSpeed(afterEdit.getSpeed());
-                target.setCurrent_position(afterEdit.getCurrent_position());
-                target.setAtk(afterEdit.getAtk());
-                target.setColor(afterEdit.getColor());
-                model.fireTableDataChanged();
-                table.updateUI();
-                btnEdit.setText("Edit");
                 try {
-                    new PoliceDAO().editElement(target);
-                } catch (SQLException ex) {
+                    Police target = model.get(table.getSelectedRow());
+                    Police afterEdit = getInfo();
+                    target.setName(afterEdit.getName());
+                    target.setDob(afterEdit.getDob());
+                    target.setSpeed(afterEdit.getSpeed());
+                    target.setPosx(afterEdit.getPosx());
+                    target.setPosy(afterEdit.getPosy());
+                    target.setAtk(afterEdit.getAtk());
+                    target.setColor(afterEdit.getColor());
+                    model.fireTableDataChanged();
+                    table.updateUI();
+                    btnEdit.setText("Edit");
+                    try {
+                        new PoliceDAO().editElement(target);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } catch (ParseException ex) {
                     Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -423,21 +425,25 @@ public class ServerGUI extends javax.swing.JFrame {
             btnDelete.setEnabled(false);
             btnAdd.setText("Accept");
         } else {
-            Police p = getInfo();
-            if (p != null) {
-                model.add(p);
-                try {
-                    new PoliceDAO().addElement(p);
-                } catch (SQLException ex) {
-                    Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            try {
+                Police p = getInfo();
+                if (p != null) {
+                    model.add(p);
+                    try {
+                        new PoliceDAO().addElement(p);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    table.updateUI();
                 }
-                table.updateUI();
+                displayInfo(new Police());
+                setFormActive(false);
+                btnEdit.setEnabled(true);
+                btnDelete.setEnabled(true);
+                btnAdd.setText("Add");
+            } catch (ParseException ex) {
+                Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
             }
-            displayInfo(new Police());
-            setFormActive(false);
-            btnEdit.setEnabled(true);
-            btnDelete.setEnabled(true);
-            btnAdd.setText("Add");
 
         }
     }//GEN-LAST:event_btnAddActionPerformed
@@ -456,18 +462,13 @@ public class ServerGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
-        try {
-            JFileChooser fc = new JFileChooser();
-            int result = fc.showSaveDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                //String fileName = System.getProperty("user.home") + "\\" + "polices.csv";
-                String fileName = fc.getSelectedFile().getAbsolutePath();
-                /*"/home/s247407/polices.csv";*/
-                CsvFile.writeCsvFile(fileName, model.getALl());
-            }
-
-        } catch (IOException ex) {
-            Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
+        JFileChooser fc = new JFileChooser();
+        int result = fc.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            //String fileName = System.getProperty("user.home") + "\\" + "polices.csv";
+            String fileName = fc.getSelectedFile().getAbsolutePath();
+            /*"/home/s247407/polices.csv";*/
+            //CsvFile.writeCsvFile(fileName, model.getALl());
         }
     }//GEN-LAST:event_btnSaveActionPerformed
 
@@ -477,13 +478,7 @@ public class ServerGUI extends javax.swing.JFrame {
         if (result == JFileChooser.APPROVE_OPTION) {
             String fileName = fc.getSelectedFile().getAbsolutePath();
             ArrayList<Police> arrPolice = new ArrayList();
-            try {
-                CsvFile.loadCsvFile(fileName, arrPolice);
-            } catch (IOException ex) {
-                Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (ParseException ex) {
-                Logger.getLogger(ServerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            //CsvFile.loadCsvFile(fileName, arrPolice);
             model = new PoliceTableModel(arrPolice);
             table.setModel(model);
         }
@@ -525,6 +520,7 @@ public class ServerGUI extends javax.swing.JFrame {
 
     }
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAdd;
     private javax.swing.JButton btnColor;
@@ -552,7 +548,8 @@ public class ServerGUI extends javax.swing.JFrame {
     private javax.swing.JTable table;
     private javax.swing.JFormattedTextField txtDob;
     private javax.swing.JTextField txtName;
-    private javax.swing.JFormattedTextField txtPosX;
+    private javax.swing.JTextField txtPosx;
+    private javax.swing.JTextField txtPosy;
     // End of variables declaration//GEN-END:variables
 
     private void displayInfo() {

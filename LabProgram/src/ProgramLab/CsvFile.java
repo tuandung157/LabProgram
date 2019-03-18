@@ -38,11 +38,11 @@ public class CsvFile {
             String str_date=sdf.format(police.getDob());
             fileWriter.write(police.getName()+COMMA_DELIMITER
                     +str_date+COMMA_DELIMITER
-                    +police.getCurrent_position().toString()+COMMA_DELIMITER
-                    +police.getSpeed()+COMMA_DELIMITER
-                    +police.getCurrent_position()+COMMA_DELIMITER
+                    +police.getPosx().toString()+COMMA_DELIMITER
+                    +police.getPosx().toString()+COMMA_DELIMITER
+                    +police.getSpeed()+COMMA_DELIMITER                    
                     +police.getAtk()+COMMA_DELIMITER
-                    +police.getColor().getRGB()+"\n");
+                    +police.getColor()+"\n");
         }
         fileWriter.flush();
         fileWriter.close();
@@ -59,7 +59,8 @@ public class CsvFile {
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");            
             Police p = new Police(scanner.next(),
                     sdf.parse(scanner.next()), 
-                    Point.parse(scanner.next()), 
+                    scanner.next(), 
+                    scanner.next(),
                     scanner.nextInt(), 
                     scanner.nextInt(),
                     new Color(scanner.nextInt(),false));
